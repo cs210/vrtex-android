@@ -8,6 +8,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
@@ -31,8 +32,8 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private Sensor mSensor;
     private TextView textView;
 
-    private String ipAddr = "127.0.0.1";
-    private int port = 8000;
+    private String ipAddr;
+    private int port;
     private OSCPortOut oscPortOut = null;
 
     @Override
@@ -76,6 +77,12 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         super.onResume();
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
         // restoreNetworkSettingsFromFile();
+        ipAddr = PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .getString("ip_address", getResources().getString(R.string.pref_default_ip_address));
+        port = Integer.parseInt(PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .getString("ip_port", getResources().getString(R.string.pref_default_ip_port)));
         initializeOSC();
         // initializeIncomingOSC();
     }
@@ -102,7 +109,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         for (Float f : event.values) {
             args.add(f);
         }
-        //sendOSC(ipAddr, args);
+        sendOSC("/xyz", args);
     }
 
     /***
@@ -126,10 +133,11 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
 
     public void sendOSC(String address, List<Object> arguments) {
         try {
-            this.oscPortOut.send(new OSCMessage(address, arguments));
+            OSCMessage msg = new OSCMessage(address, arguments);
+            new AsyncSendOSCTask(this, oscPortOut).execute(msg);
         }
         catch(Exception exp) {
-            Toast.makeText(this, "Error Sending Message", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, exp.toString(), Toast.LENGTH_SHORT).show();
         }
     }
 }
