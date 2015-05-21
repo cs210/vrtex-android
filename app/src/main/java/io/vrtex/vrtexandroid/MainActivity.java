@@ -2,21 +2,38 @@ package io.vrtex.vrtexandroid;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.illposed.osc.OSCMessage;
+import com.illposed.osc.OSCPortOut;
+
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 
-public class MainActivity extends Activity implements SensorEventListener {
+public class MainActivity extends ActionBarActivity implements SensorEventListener {
     private SensorManager mSensorManager;
     private Sensor mSensor;
     private TextView textView;
+
+    private String ipAddr = "127.0.0.1";
+    private int port = 8000;
+    private OSCPortOut oscPortOut = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,21 +60,31 @@ public class MainActivity extends Activity implements SensorEventListener {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch(id){
+            case R.id.action_settings:
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
 
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 
     protected void onResume() {
         super.onResume();
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        // restoreNetworkSettingsFromFile();
+        initializeOSC();
+        // initializeIncomingOSC();
     }
 
     protected void onPause() {
         super.onPause();
         mSensorManager.unregisterListener(this);
+
+        if(this.oscPortOut != null) {
+            this.oscPortOut.close();
+        }
     }
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -68,5 +95,39 @@ public class MainActivity extends Activity implements SensorEventListener {
         String value1 = Float.toString(event.values[1]);
         String value2 = Float.toString(event.values[2]);
         textView.setText(value0 + ", " + value1 + ", " + value2);
+
+        List args = new ArrayList();
+        for (Float f : event.values) {
+            args.add(f);
+        }
+        //sendOSC(ipAddr, args);
+    }
+
+    /***
+     * Initializes the OSCPortOut class with the given ipAddress and port.
+     * Called once at the beginning in onCreate() method and at the end of the network settings dialog save action.
+     */
+    private void initializeOSC() {
+        try {
+
+            if(oscPortOut != null) {
+                oscPortOut.close();
+            }
+
+            oscPortOut = new OSCPortOut(InetAddress.getByName(ipAddr), port);
+        }
+        catch(Exception exp) {
+            Toast.makeText(this, exp.toString(), Toast.LENGTH_LONG).show();
+            oscPortOut = null;
+        }
+    }
+
+    public void sendOSC(String address, List<Object> arguments) {
+        try {
+            this.oscPortOut.send(new OSCMessage(address, arguments));
+        }
+        catch(Exception exp) {
+            Toast.makeText(this, "Error Sending Message", Toast.LENGTH_SHORT).show();
+        }
     }
 }
