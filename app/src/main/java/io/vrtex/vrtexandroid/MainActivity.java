@@ -118,7 +118,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
      */
     private void initializeOSC() {
         try {
-
             if(oscPortOut != null) {
                 oscPortOut.close();
             }
@@ -132,12 +131,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     }
 
     public void sendOSC(String address, List<Object> arguments) {
-        try {
-            OSCMessage msg = new OSCMessage(address, arguments);
-            new AsyncSendOSCTask(this, oscPortOut).execute(msg);
-        }
-        catch(Exception exp) {
-            Toast.makeText(this, exp.toString(), Toast.LENGTH_SHORT).show();
-        }
+        OSCMessage msg = new OSCMessage(address, arguments);
     }
 }
