@@ -62,6 +62,8 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         //noinspection SimplifiableIfStatement
         switch(id){
             case R.id.action_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
                 break;
             default:
                 return super.onOptionsItemSelected(item);
