@@ -99,17 +99,57 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
+    @Override
     public void onSensorChanged(SensorEvent event) {
+        if (event.accuracy == SensorManager.SENSOR_STATUS_ACCURACY_LOW)
+            return;
+
+        float[] mRotationMatrixFromVector = new float[16];
+        float[] mRotationMatrix = new float[16];
+        float[] orientationVals = new float[4];
+
         String value0 = Float.toString(event.values[0]);
         String value1 = Float.toString(event.values[1]);
         String value2 = Float.toString(event.values[2]);
-        textView.setText(value0 + ", " + value1 + ", " + value2);
+
+        // Convert the rotation-vector to a 4x4 matrix.
+        SensorManager.getRotationMatrixFromVector(mRotationMatrixFromVector, event.values);
+        SensorManager.remapCoordinateSystem(
+                mRotationMatrixFromVector,
+                //SensorManager.AXIS_Y,
+                //SensorManager.AXIS_MINUS_X,
+                SensorManager.AXIS_X,
+                SensorManager.AXIS_Y,
+                mRotationMatrix);
+        SensorManager.getOrientation(mRotationMatrix, orientationVals);
+        /*
+        SensorManager.getOrientation(mRotationMatrixFromVector, orientationVals);
+        */
+
+        // Optionally convert the result from radians to degrees
+        /*
+        orientationVals[0] = (float) Math.toDegrees(orientationVals[0]);
+        orientationVals[1] = (float) Math.toDegrees(orientationVals[1]);
+        orientationVals[2] = (float) Math.toDegrees(orientationVals[2]);
+        float denom = (float) (Math.PI / 2);
+         */
+
+        float yaw = orientationVals[0];
+        float roll = -orientationVals[2];
+        float pitch = orientationVals[1];
+
+        textView.setText(
+                " Yaw: " + yaw +
+                        "\n Pitch: " + pitch +
+                        "\n Roll:  " + roll
+        );
 
         List args = new ArrayList();
-        for (Float f : event.values) {
-            args.add(f);
-        }
-        sendOSC("/xyz", args);
+        args.add(yaw);
+        args.add(pitch);
+        args.add(roll);
+        args.add(0);
+        sendOSC("/accxyz", args);
     }
 
     /***
@@ -132,5 +172,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
 
     public void sendOSC(String address, List<Object> arguments) {
         OSCMessage msg = new OSCMessage(address, arguments);
+        new AsyncSendOSCTask(this, this.oscPortOut).execute(msg);
     }
 }
