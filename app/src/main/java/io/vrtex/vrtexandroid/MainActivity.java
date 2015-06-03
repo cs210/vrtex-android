@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,13 +22,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.illposed.osc.OSCListener;
 import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPortOut;
+import com.illposed.osc.OSCPortIn;
 
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 
@@ -40,6 +45,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private String ipAddr;
     private int port;
     private OSCPortOut oscPortOut = null;
+    private int inPort = 8090;
+    private OSCPortIn oscPortIn = null;
+
+    private OSCListener oscListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +71,29 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         Button beam = (Button)findViewById(R.id.beamButton);
         shield.setOnClickListener(handleClick);
         beam.setOnClickListener(handleClick);
+
+        final Context _this = this;
+
+        this.oscListener = new OSCListener() {
+            @Override
+            public void acceptMessage(Date date, OSCMessage oscMessage) {
+                String address = oscMessage.getAddress();
+                final List<Object> args = oscMessage.getArguments();
+                switch(address) {
+                    case "/text":
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                textView.setText((String)args.get(0));
+                            }
+                        });
+                        break;
+                    default:
+                        Toast.makeText(_this, "Invalid OSC Message", Toast.LENGTH_SHORT);
+                        break;
+                }
+            }
+        };
     }
 
     private View.OnClickListener handleClick = new View.OnClickListener(){
@@ -109,7 +141,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 .getDefaultSharedPreferences(this)
                 .getString("ip_port", getResources().getString(R.string.pref_default_ip_port)));
         initializeOSC();
-        // initializeIncomingOSC();
+        initializeIncomingOSC();
     }
 
     protected void onPause() {
@@ -163,11 +195,11 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         float roll = -orientationVals[2];
         float pitch = orientationVals[1];
 
-        textView.setText(
+        /*textView.setText(
                 " Yaw: " + yaw +
                         "\n Pitch: " + pitch +
                         "\n Roll:  " + roll
-        );
+        );*/
 
         List args = new ArrayList();
         args.add(yaw);
@@ -192,6 +224,27 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         catch(Exception exp) {
             Toast.makeText(this, exp.toString(), Toast.LENGTH_LONG).show();
             oscPortOut = null;
+        }
+    }
+
+    private void initializeIncomingOSC() {
+        if (this.oscPortIn != null) {
+            if (this.oscPortIn.isListening()) {
+                this.oscPortIn.stopListening();
+            }
+
+            this.oscPortIn.close();
+            this.oscPortIn = null;
+        }
+
+        try {
+            this.oscPortIn = new OSCPortIn(this.inPort);
+            this.oscPortIn.addListener("/*", oscListener);
+            this.oscPortIn.startListening();
+        }
+        catch(SocketException se) {
+            se.printStackTrace();
+            Log.e("MainActivity", se.getMessage());
         }
     }
 
