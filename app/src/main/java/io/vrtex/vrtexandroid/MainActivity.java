@@ -14,6 +14,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,7 +58,18 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 sendOSC("/shuttleDoor", args);
             }
         });
+        Button shield = (Button)findViewById(R.id.shieldButton);
+        Button beam = (Button)findViewById(R.id.beamButton);
+        shield.setOnClickListener(handleClick);
+        beam.setOnClickListener(handleClick);
     }
+
+    private View.OnClickListener handleClick = new View.OnClickListener(){
+        public void onClick(View view) {
+            String test = view.getResources().getResourceName(view.getId());
+            sendOSC("/" + test + "Pressed", 1);
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -180,6 +193,15 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             Toast.makeText(this, exp.toString(), Toast.LENGTH_LONG).show();
             oscPortOut = null;
         }
+    }
+
+    public void sendOSC(String address, Object argument) {
+        List<Object> args = new ArrayList<Object>();
+        if (argument.getClass().equals(Boolean.class))
+            args.add((Boolean)argument ? 1 : 0);
+        else
+            args.add(argument);
+        sendOSC(address, args);
     }
 
     public void sendOSC(String address, List<Object> arguments) {

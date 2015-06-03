@@ -25,6 +25,27 @@
             android:textOn="Close Shuttle Door"
             android:checked="false"
         />
+
+        <LinearLayout
+            android:layout_width="150dp"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            >
+            <Button
+                android:id="@+id/shieldButton"
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="Shield"
+            />
+            <Button
+                android:id="@+id/beamButton"
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="Tractor Beam"
+            />
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>
