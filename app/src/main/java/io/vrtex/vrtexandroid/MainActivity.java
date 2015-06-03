@@ -14,8 +14,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPortOut;
@@ -31,6 +33,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private SensorManager mSensorManager;
     private Sensor mSensor;
     private TextView textView;
+    private ToggleButton shuttleDoorToggle;
 
     private String ipAddr;
     private int port;
@@ -44,6 +47,15 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         textView = (TextView)findViewById(R.id.dataOutput);
+        shuttleDoorToggle = (ToggleButton)findViewById(R.id.shuttleDoorToggle);
+        shuttleDoorToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                List<Object> args = new ArrayList<Object>();
+                args.add(isChecked ? 1 : 0);
+                sendOSC("/shuttleDoor", args);
+            }
+        });
     }
 
     @Override
