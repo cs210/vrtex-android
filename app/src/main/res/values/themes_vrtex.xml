@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <style name="Vrtex" parent="@style/_Vrtex"/>
+
+  <style name="_Vrtex" parent="Theme.AppCompat">
+
+    <item name="android:buttonStyle">@style/ButtonVrtex</item>
+
+    <item name="android:imageButtonStyle">@style/ImageButtonVrtex</item>
+
+    <item name="android:progressBarStyleHorizontal">@style/ProgressBarVrtex</item>
+
+    <item name="android:buttonStyleToggle">@style/ToggleVrtex</item>
+
+  </style>
+
+</resources>

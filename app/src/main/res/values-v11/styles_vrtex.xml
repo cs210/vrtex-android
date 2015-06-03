@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <style name="ButtonVrtex" parent="android:Widget.Holo.Light.Button">
+	  <item name="android:background">@drawable/vrtex_btn_default_holo_light</item>
+  </style>
+
+  <style name="ImageButtonVrtex" parent="android:Widget.Holo.Light.ImageButton">
+	  <item name="android:background">@drawable/vrtex_btn_default_holo_light</item>
+  </style>
+
+  <style name="ProgressBarVrtex" parent="android:Widget.Holo.Light.ProgressBar.Horizontal">
+      <item name="android:progressDrawable">@drawable/vrtex_progress_horizontal_holo_light</item>
+      <item name="android:indeterminateDrawable">@drawable/vrtex_progress_indeterminate_horizontal_holo_light</item>
+  </style>
+
+  <style name="ToggleVrtex" parent="android:Widget.Holo.Light.Button.Toggle">
+      <item name="android:background">@drawable/vrtex_btn_toggle_holo_light</item>
+  </style>
+
+</resources>
