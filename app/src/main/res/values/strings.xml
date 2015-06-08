@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">VrtexAndroid</string>
 
-    <string name="hello_world">Hello world!</string>
+    <string name="awaiting_command">Awaiting command...</string>
+    <string name="not_in_park">Can only activate Tractor Beam in park</string>
     <string name="action_settings">Settings</string>
 </resources>

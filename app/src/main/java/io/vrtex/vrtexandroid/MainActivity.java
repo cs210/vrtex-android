@@ -34,13 +34,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 
 public class MainActivity extends ActionBarActivity implements SensorEventListener {
     private SensorManager mSensorManager;
     private Sensor mSensor;
     private TextView textView;
-    private ToggleButton shuttleDoorToggle;
+    private ToggleButton beamShieldToggle;
+    private ToggleButton parkDriveToggle;
 
     private String ipAddr;
     private int port;
@@ -49,6 +51,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private OSCPortIn oscPortIn = null;
 
     private OSCListener oscListener;
+    private Random random;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,19 +61,33 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         textView = (TextView)findViewById(R.id.dataOutput);
-        shuttleDoorToggle = (ToggleButton)findViewById(R.id.shuttleDoorToggle);
-        shuttleDoorToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        beamShieldToggle = (ToggleButton)findViewById(R.id.beamShieldToggle);
+        parkDriveToggle = (ToggleButton)findViewById(R.id.parkDriveToggle);
+        random = new Random();
+
+        beamShieldToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                List<Object> args = new ArrayList<Object>();
-                args.add(isChecked ? 1 : 0);
-                sendOSC("/shuttleDoor", args);
+                String type = isChecked ? "beam" : "shield";
+                Integer randomInt = random.nextInt(5) + 1;
+                sendOSC("/mode" + type, randomInt);
+                textView.setText(randomInt.toString() + " fingers");
+                beamShieldToggle.setEnabled(false);
+                parkDriveToggle.setEnabled(false);
             }
         });
-        Button shield = (Button)findViewById(R.id.shieldButton);
-        Button beam = (Button)findViewById(R.id.beamButton);
-        shield.setOnClickListener(handleClick);
-        beam.setOnClickListener(handleClick);
+
+        parkDriveToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                String type = isChecked ? "park" : "drive";
+                Integer randomInt = random.nextInt(5) + 1;
+                sendOSC("/mode" + type, randomInt);
+                textView.setText(randomInt.toString() + " fingers");
+                beamShieldToggle.setEnabled(false);
+                parkDriveToggle.setEnabled(false);
+            }
+        });
 
         final Context _this = this;
 
@@ -80,11 +97,32 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 String address = oscMessage.getAddress();
                 final List<Object> args = oscMessage.getArguments();
                 switch(address) {
-                    case "/text":
+                    case "/android/text":
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 textView.setText((String)args.get(0));
+                            }
+                        });
+                        break;
+                    case "/android/modeChanged":
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                textView.setText(R.string.awaiting_command);
+                                parkDriveToggle.setEnabled(true);
+                                beamShieldToggle.setEnabled(true);
+                            }
+                        });
+                        break;
+                    case "/android/notInPark":
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                textView.setText(R.string.not_in_park);
+                                beamShieldToggle.setChecked(false);
+                                parkDriveToggle.setEnabled(true);
+                                beamShieldToggle.setEnabled(true);
                             }
                         });
                         break;
