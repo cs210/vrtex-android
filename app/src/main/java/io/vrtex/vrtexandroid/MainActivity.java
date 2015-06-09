@@ -181,6 +181,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             @Override
                             public void run() {
                                 driveButton.setEnabled(true);
+                                beamButton.setEnabled(true);
                                 parkButton.setEnabled(false);
                                 parkButton.setText(R.string.park);
                                 textView.setText(R.string.awaiting_command);
@@ -191,6 +192,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                beamButton.setEnabled(false);
                                 driveButton.setEnabled(false);
                                 parkButton.setEnabled(true);
                                 driveButton.setText(R.string.drive);
