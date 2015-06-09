@@ -189,6 +189,13 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         if(this.oscPortOut != null) {
             this.oscPortOut.close();
         }
+
+        if (this.oscPortIn != null) {
+            if (this.oscPortIn.isListening()) {
+                this.oscPortIn.stopListening();
+            }
+            this.oscPortIn.close();
+        }
     }
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
