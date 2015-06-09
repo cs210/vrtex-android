@@ -81,7 +81,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         beamButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Integer randomInt = random.nextInt(5) + 1;
+                Integer randomInt = randomFingerCount();
                 textView.setText(randomInt.toString() + " fingers");
                 disableButtons();
                 beamButton.setText("Activating...");
@@ -92,7 +92,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         shieldButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Integer randomInt = random.nextInt(5) + 1;
+                Integer randomInt = randomFingerCount();
                 textView.setText(randomInt.toString() + " fingers");
                 disableButtons();
                 shieldButton.setText("Activating...");
@@ -103,7 +103,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         parkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Integer randomInt = random.nextInt(5) + 1;
+                Integer randomInt = randomFingerCount();
                 textView.setText(randomInt.toString() + " fingers");
                 disableButtons();
                 parkButton.setText("Shifting...");
@@ -114,7 +114,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         driveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Integer randomInt = random.nextInt(5) + 1;
+                Integer randomInt = randomFingerCount();
                 textView.setText(randomInt.toString() + " fingers");
                 disableButtons();
                 driveButton.setText("Shifting...");
@@ -233,6 +233,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         shieldButton.setEnabled(false);
         parkButton.setEnabled(false);
         driveButton.setEnabled(false);
+    }
+
+    private int randomFingerCount() {
+        return random.nextInt(4) + 2;
     }
 
     private View.OnClickListener handleClick = new View.OnClickListener(){
