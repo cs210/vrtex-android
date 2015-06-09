@@ -284,7 +284,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
 
         try {
             this.oscPortIn = new OSCPortIn(this.inPort);
-            this.oscPortIn.addListener("/*", oscListener);
+            this.oscPortIn.addListener("/android/*", oscListener);
             this.oscPortIn.startListening();
         }
         catch(SocketException se) {
