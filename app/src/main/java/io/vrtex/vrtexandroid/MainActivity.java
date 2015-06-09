@@ -41,8 +41,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private SensorManager mSensorManager;
     private Sensor mSensor;
     private TextView textView;
-    private ToggleButton beamShieldToggle;
-    private ToggleButton parkDriveToggle;
+    private Button beamButton;
+    private Button shieldButton;
+    private Button parkButton;
+    private Button driveButton;
 
     private String ipAddr;
     private int port;
@@ -61,31 +63,53 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         textView = (TextView)findViewById(R.id.dataOutput);
-        beamShieldToggle = (ToggleButton)findViewById(R.id.beamShieldToggle);
-        parkDriveToggle = (ToggleButton)findViewById(R.id.parkDriveToggle);
+        beamButton = (Button)findViewById(R.id.beamButton);
+        shieldButton = (Button)findViewById(R.id.shieldButton);
+        parkButton = (Button)findViewById(R.id.parkButton);
+        driveButton = (Button)findViewById(R.id.driveButton);
         random = new Random();
 
-        beamShieldToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        beamButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                String type = isChecked ? "beam" : "shield";
+            public void onClick(View v) {
                 Integer randomInt = random.nextInt(5) + 1;
-                sendOSC("/mode" + type, randomInt);
+                sendOSC("/modebeam", randomInt);
                 textView.setText(randomInt.toString() + " fingers");
-                beamShieldToggle.setEnabled(false);
-                parkDriveToggle.setEnabled(false);
+                disableButtons();
+                beamButton.setText("Activating...");
             }
         });
 
-        parkDriveToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        shieldButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                String type = isChecked ? "park" : "drive";
+            public void onClick(View v) {
                 Integer randomInt = random.nextInt(5) + 1;
-                sendOSC("/mode" + type, randomInt);
                 textView.setText(randomInt.toString() + " fingers");
-                beamShieldToggle.setEnabled(false);
-                parkDriveToggle.setEnabled(false);
+                disableButtons();
+                shieldButton.setText("Activating...");
+                sendOSC("/modeshield", randomInt);
+            }
+        });
+
+        parkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Integer randomInt = random.nextInt(5) + 1;
+                textView.setText(randomInt.toString() + " fingers");
+                disableButtons();
+                parkButton.setText("Shifting...");
+                sendOSC("/modepark", randomInt);
+            }
+        });
+
+        driveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Integer randomInt = random.nextInt(5) + 1;
+                sendOSC("/modedrive", randomInt);
+                textView.setText(randomInt.toString() + " fingers");
+                disableButtons();
+                driveButton.setText("Shifting...");
             }
         });
 
@@ -97,6 +121,19 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 String address = oscMessage.getAddress();
                 final List<Object> args = oscMessage.getArguments();
                 switch(address) {
+                    case "/android/state":
+                        final boolean isParked = ((Integer)args.get(0)) == 1;
+                        final boolean isBeamActive = ((Integer)args.get(1)) == 1;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                beamButton.setEnabled(!isBeamActive);
+                                shieldButton.setEnabled(isBeamActive);
+                                parkButton.setEnabled(!isParked);
+                                driveButton.setEnabled(isParked);
+                            }
+                        });
+                        break;
                     case "/android/text":
                         runOnUiThread(new Runnable() {
                             @Override
@@ -105,13 +142,48 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             }
                         });
                         break;
-                    case "/android/modeChanged":
+
+                    case "/android/becomeBeam":
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                enableButtons();
+                                beamButton.setEnabled(false);
+                                beamButton.setText("Beam");
                                 textView.setText(R.string.awaiting_command);
-                                parkDriveToggle.setEnabled(true);
-                                beamShieldToggle.setEnabled(true);
+                            }
+                        });
+                        break;
+                    case "/android/becomeShield":
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                enableButtons();
+                                shieldButton.setEnabled(false);
+                                shieldButton.setText("Shield");
+                                textView.setText(R.string.awaiting_command);
+                            }
+                        });
+                        break;
+                    case "/android/becomePark":
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                enableButtons();
+                                parkButton.setEnabled(false);
+                                parkButton.setText("Park");
+                                textView.setText(R.string.awaiting_command);
+                            }
+                        });
+                        break;
+                    case "/android/becomeDrive":
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                enableButtons();
+                                driveButton.setEnabled(false);
+                                driveButton.setText("Drive");
+                                textView.setText(R.string.awaiting_command);
                             }
                         });
                         break;
@@ -120,18 +192,34 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             @Override
                             public void run() {
                                 textView.setText(R.string.not_in_park);
-                                beamShieldToggle.setChecked(false);
-                                parkDriveToggle.setEnabled(true);
-                                beamShieldToggle.setEnabled(true);
                             }
                         });
                         break;
                     default:
-                        Toast.makeText(_this, "Invalid OSC Message", Toast.LENGTH_SHORT);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(_this, "Invalid OSC Message", Toast.LENGTH_SHORT);
+                            }
+                        });
                         break;
                 }
             }
         };
+    }
+
+    private void enableButtons() {
+        beamButton.setEnabled(true);
+        shieldButton.setEnabled(true);
+        parkButton.setEnabled(true);
+        driveButton.setEnabled(true);
+    }
+
+    private void disableButtons() {
+        beamButton.setEnabled(false);
+        shieldButton.setEnabled(false);
+        parkButton.setEnabled(false);
+        driveButton.setEnabled(false);
     }
 
     private View.OnClickListener handleClick = new View.OnClickListener(){
@@ -180,6 +268,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 .getString("ip_port", getResources().getString(R.string.pref_default_ip_port)));
         initializeOSC();
         initializeIncomingOSC();
+        initializeState();
     }
 
     protected void onPause() {
@@ -252,6 +341,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         args.add(roll);
         args.add(0);
         sendOSC("/accxyz", args);
+    }
+
+    private void initializeState() {
+        sendOSC("/android/state", null);
     }
 
     /***
