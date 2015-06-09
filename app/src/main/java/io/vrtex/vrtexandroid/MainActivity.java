@@ -41,6 +41,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private SensorManager mSensorManager;
     private Sensor mSensor;
     private TextView textView;
+    private Button useBeamButton;
     private Button beamButton;
     private Button shieldButton;
     private Button parkButton;
@@ -63,20 +64,28 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         textView = (TextView)findViewById(R.id.dataOutput);
+        useBeamButton = (Button)findViewById(R.id.useBeamButton);
         beamButton = (Button)findViewById(R.id.beamButton);
         shieldButton = (Button)findViewById(R.id.shieldButton);
         parkButton = (Button)findViewById(R.id.parkButton);
         driveButton = (Button)findViewById(R.id.driveButton);
         random = new Random();
 
+        useBeamButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendOSC("/usebeam", null);
+            }
+        });
+
         beamButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Integer randomInt = random.nextInt(5) + 1;
-                sendOSC("/modebeam", randomInt);
                 textView.setText(randomInt.toString() + " fingers");
                 disableButtons();
                 beamButton.setText("Activating...");
+                sendOSC("/modebeam", randomInt);
             }
         });
 
@@ -106,10 +115,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             @Override
             public void onClick(View v) {
                 Integer randomInt = random.nextInt(5) + 1;
-                sendOSC("/modedrive", randomInt);
                 textView.setText(randomInt.toString() + " fingers");
                 disableButtons();
                 driveButton.setText("Shifting...");
+                sendOSC("/modedrive", randomInt);
             }
         });
 
@@ -147,9 +156,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                enableButtons();
+                                shieldButton.setEnabled(true);
                                 beamButton.setEnabled(false);
-                                beamButton.setText("Beam");
+                                beamButton.setText(R.string.beam);
+                                useBeamButton.setVisibility(View.VISIBLE);
                                 textView.setText(R.string.awaiting_command);
                             }
                         });
@@ -158,9 +168,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                enableButtons();
+                                beamButton.setEnabled(true);
                                 shieldButton.setEnabled(false);
-                                shieldButton.setText("Shield");
+                                shieldButton.setText(R.string.shield);
+                                useBeamButton.setVisibility(View.INVISIBLE);
                                 textView.setText(R.string.awaiting_command);
                             }
                         });
@@ -169,9 +180,9 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                enableButtons();
+                                driveButton.setEnabled(true);
                                 parkButton.setEnabled(false);
-                                parkButton.setText("Park");
+                                parkButton.setText(R.string.park);
                                 textView.setText(R.string.awaiting_command);
                             }
                         });
@@ -180,9 +191,9 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                enableButtons();
                                 driveButton.setEnabled(false);
-                                driveButton.setText("Drive");
+                                parkButton.setEnabled(true);
+                                driveButton.setText(R.string.drive);
                                 textView.setText(R.string.awaiting_command);
                             }
                         });

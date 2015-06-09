@@ -32,7 +32,7 @@
                 android:layout_width="fill_parent"
                 android:layout_weight="1"
                 android:layout_height="0dp"
-                android:text="Tractor Beam"
+                android:text="@string/beam"
                 />
 
             <Button
@@ -40,10 +40,19 @@
                 android:layout_width="fill_parent"
                 android:layout_weight="1"
                 android:layout_height="0dp"
-                android:text="Shield"
+                android:text="@string/shield"
                 />
 
         </LinearLayout>
+
+        <Button
+            android:id="@+id/useBeamButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="fill_parent"
+            android:visibility="invisible"
+            android:text="@string/useBeam"
+            android:background="#00AA00" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -57,7 +66,7 @@
                 android:layout_width="fill_parent"
                 android:layout_weight="1"
                 android:layout_height="0dp"
-                android:text="Park"
+                android:text="@string/park"
                 />
 
             <Button
@@ -65,7 +74,7 @@
                 android:layout_width="fill_parent"
                 android:layout_weight="1"
                 android:layout_height="0dp"
-                android:text="Drive"
+                android:text="@string/drive"
                 />
 
         </LinearLayout>

@@ -1,6 +1,12 @@
 <resources>
     <string name="app_name">VrtexAndroid</string>
 
+    <string name="useBeam">Use Beam</string>
+    <string name="beam">Activate Tractor Beam</string>
+    <string name="shield">Activate Shields</string>
+    <string name="park">Shift to Park</string>
+    <string name="drive">Shift to Drive</string>
+
     <string name="awaiting_command">Awaiting command...</string>
     <string name="not_in_park">Can only activate Tractor Beam in park</string>
     <string name="action_settings">Settings</string>
